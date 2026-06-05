@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Perfil {
+  ADMINISTRADOR
+  USUARIO
+}
+
+enum StatusUsuario {
+  ATIVO
+  INATIVO
+}
+
+enum StatusEmpresa {
+  ATIVA
+  INATIVA
+  SUSPENSA
+  BAIXADA
+}
+
+enum StatusECD {
+  PENDENTE
+  EM_ANDAMENTO
+  ENTREGUE
+  DISPENSADA
+}
+
+enum StatusECF {
+  PENDENTE
+  EM_ANDAMENTO
+  ENTREGUE
+  DISPENSADA
+}
+
+enum Prioridade {
+  BAIXA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+model Usuario {
+  id              String        @id @default(cuid())
+  nome            String
+  email           String        @unique
+  usuario         String        @unique
+  senha_hash      String
+  perfil          Perfil        @default(USUARIO)
+  status          StatusUsuario @default(ATIVO)
+  primeiro_acesso Boolean       @default(true)
+  data_criacao    DateTime      @default(now())
+  ultimo_acesso   DateTime?
+
+  auditorias Auditoria[]
+
+  @@map("usuarios")
+}
+
+model Empresa {
+  id                         String        @id @default(cuid())
+  empresa                    String
+  cnpj                       String        @unique
+  grupo                      String?
+  data_abertura              DateTime?
+  contato                    String?
+  responsavel                String?
+  auxiliar                   String?
+  responsavel_finalizar_2025 String?
+  situacao_empresa           StatusEmpresa @default(ATIVA)
+  ordem                      Int?
+  prioridade                 Prioridade    @default(MEDIA)
+  prazo                      DateTime?
+  ecd_status                 StatusECD     @default(PENDENTE)
+  ecf_status                 StatusECF     @default(PENDENTE)
+  recibo_ecd                 String?
+  recibo_ecf                 String?
+  criado_por_id              String?
+  atualizado_por_id          String?
+  data_criacao               DateTime      @default(now())
+  data_atualizacao           DateTime      @updatedAt
+
+  auditorias Auditoria[]
+
+  @@map("empresas")
+}
+
+model Auditoria {
+  id           String   @id @default(cuid())
+  tabela       String
+  operacao     String
+  registro_id  String
+  campo        String?
+  valor_antes  String?
+  valor_depois String?
+  descricao    String?
+  data         DateTime @default(now())
+
+  usuario_id String?
+  usuario    Usuario? @relation(fields: [usuario_id], references: [id])
+  empresa_id String?
+  empresa    Empresa? @relation(fields: [empresa_id], references: [id])
+
+  @@map("auditorias")
+}
