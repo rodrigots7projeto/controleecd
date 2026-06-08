@@ -9,7 +9,7 @@ export default function UsuarioActions({ id, status }: Props) {
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
 
-  async function handleAction(fn: (id: string) => Promise<{ message?: string }>) {
+  async function handleAction(fn: (id: string) => Promise<{ message?: string } | undefined>) {
     setLoading(true)
     const result = await fn(id)
     if (result?.message) setMsg(result.message)

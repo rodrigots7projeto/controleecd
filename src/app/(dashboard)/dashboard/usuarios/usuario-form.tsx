@@ -1,10 +1,18 @@
 'use client'
-import { useActionState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import { criarUsuario, editarUsuario } from '@/app/actions/usuarios'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { PERMISSOES } from '@/lib/permissoes'
 
-type Usuario = { id: string; nome: string; email: string; usuario: string; perfil: string; status: string }
+type Usuario = {
+  id: string
+  nome: string
+  email: string
+  usuario: string
+  perfil: string
+  status: string
+  permissoes: string[]
+}
 type Props = { usuario?: Usuario }
 
 export default function UsuarioForm({ usuario }: Props) {
@@ -16,12 +24,15 @@ export default function UsuarioForm({ usuario }: Props) {
     : criarUsuario
 
   const [state, formAction, pending] = useActionState(action, undefined)
+  const [perfil, setPerfil] = useState(usuario?.perfil ?? 'USUARIO')
 
   useEffect(() => {
     if (state?.message && !state.errors) {
       setTimeout(() => router.push('/dashboard/usuarios'), 1500)
     }
   }, [state, router])
+
+  const grupos = Array.from(new Set(PERMISSOES.map(p => p.grupo)))
 
   return (
     <form action={formAction} className="space-y-5">
@@ -74,7 +85,8 @@ export default function UsuarioForm({ usuario }: Props) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Perfil *</label>
             <select
               name="perfil"
-              defaultValue={usuario?.perfil ?? 'USUARIO'}
+              value={perfil}
+              onChange={e => setPerfil(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="USUARIO">Usuário</option>
@@ -117,6 +129,34 @@ export default function UsuarioForm({ usuario }: Props) {
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {state?.errors?.senha && <p className="text-red-500 text-xs mt-1">{state.errors.senha[0]}</p>}
+          </div>
+        )}
+
+        {perfil === 'USUARIO' && (
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">Permissões de Acesso</label>
+            <div className="border border-gray-200 rounded-lg divide-y divide-gray-100">
+              {grupos.map(grupo => (
+                <div key={grupo} className="p-3">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{grupo}</p>
+                  <div className="space-y-2">
+                    {PERMISSOES.filter(p => p.grupo === grupo).map(p => (
+                      <label key={p.key} className="flex items-center gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="permissoes"
+                          value={p.key}
+                          defaultChecked={usuario?.permissoes?.includes(p.key)}
+                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">{p.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">Administradores têm acesso total automaticamente.</p>
           </div>
         )}
       </div>

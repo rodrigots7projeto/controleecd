@@ -21,6 +21,7 @@ export async function criarUsuario(state: FormState, formData: FormData): Promis
   }
 
   const { nome, email, usuario, senha, perfil, status } = validated.data
+  const permissoes = formData.getAll('permissoes').map(String)
 
   const existente = await prisma.usuario.findFirst({
     where: { OR: [{ email }, { usuario }] },
@@ -31,7 +32,7 @@ export async function criarUsuario(state: FormState, formData: FormData): Promis
 
   const senha_hash = await bcrypt.hash(senha, 12)
   const novo = await prisma.usuario.create({
-    data: { nome, email, usuario, senha_hash, perfil, status },
+    data: { nome, email, usuario, senha_hash, perfil, status, permissoes },
   })
 
   await registrarAuditoria({
@@ -66,6 +67,7 @@ export async function editarUsuario(
   }
 
   const { nome, email, usuario, perfil, status, nova_senha } = validated.data
+  const permissoes = formData.getAll('permissoes').map(String)
 
   const existente = await prisma.usuario.findFirst({
     where: { OR: [{ email }, { usuario }], NOT: { id } },
@@ -74,7 +76,7 @@ export async function editarUsuario(
     return { message: 'E-mail ou nome de usuário já está em uso por outro usuário.' }
   }
 
-  const updateData: Record<string, unknown> = { nome, email, usuario, perfil, status }
+  const updateData: Record<string, unknown> = { nome, email, usuario, perfil, status, permissoes }
   if (nova_senha && nova_senha.length >= 6) {
     updateData.senha_hash = await bcrypt.hash(nova_senha, 12)
     updateData.primeiro_acesso = true

@@ -1,8 +1,10 @@
 import 'dotenv/config'
 import { PrismaClient } from '../src/generated/prisma/client'
+import { PrismaLibSql } from '@prisma/adapter-libsql'
 import bcrypt from 'bcryptjs'
 
-const prisma = new PrismaClient()
+const adapter = new PrismaLibSql({ url: process.env.DATABASE_URL! })
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   const adminExistente = await prisma.usuario.findFirst({
@@ -10,7 +12,7 @@ async function main() {
   })
 
   if (!adminExistente) {
-    const senha_hash = await bcrypt.hash('admin123', 12)
+    const senha_hash = await bcrypt.hash('258456', 12)
     await prisma.usuario.create({
       data: {
         nome: 'Administrador',
@@ -22,7 +24,7 @@ async function main() {
         primeiro_acesso: true,
       },
     })
-    console.log('✅ Usuário administrador criado: admin / admin123')
+    console.log('✅ Usuário administrador criado: admin / 258456')
     console.log('⚠️  Troque a senha no primeiro acesso!')
   } else {
     console.log('ℹ️  Usuário administrador já existe.')

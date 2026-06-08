@@ -42,6 +42,7 @@ export async function login(state: FormState, formData: FormData): Promise<FormS
     nome: usuario.nome,
     perfil: usuario.perfil as 'ADMINISTRADOR' | 'USUARIO',
     primeiro_acesso: usuario.primeiro_acesso,
+    permissoes: usuario.permissoes,
   })
 
   if (usuario.primeiro_acesso) {
@@ -90,6 +91,7 @@ export async function alterarSenha(state: FormState, formData: FormData): Promis
     nome: usuario.nome,
     perfil: usuario.perfil as 'ADMINISTRADOR' | 'USUARIO',
     primeiro_acesso: false,
+    permissoes: usuario.permissoes,
   })
 
   redirect('/dashboard')

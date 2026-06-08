@@ -29,6 +29,8 @@ enum StatusECD {
   EM_ANDAMENTO
   ENTREGUE
   DISPENSADA
+  ENTREGUE_RETIFICAR
+  RETIFICADO_OK
 }
 
 enum StatusECF {
@@ -36,6 +38,8 @@ enum StatusECF {
   EM_ANDAMENTO
   ENTREGUE
   DISPENSADA
+  ENTREGUE_RETIFICAR
+  RETIFICADO_OK
 }
 
 enum Prioridade {
@@ -54,6 +58,7 @@ model Usuario {
   perfil          Perfil        @default(USUARIO)
   status          StatusUsuario @default(ATIVO)
   primeiro_acesso Boolean       @default(true)
+  permissoes      String[]      @default([])
   data_criacao    DateTime      @default(now())
   ultimo_acesso   DateTime?
 
@@ -80,6 +85,8 @@ model Empresa {
   ecf_status                 StatusECF     @default(PENDENTE)
   recibo_ecd                 String?
   recibo_ecf                 String?
+  comentario_ecd             String?
+  comentario_ecf             String?
   criado_por_id              String?
   atualizado_por_id          String?
   data_criacao               DateTime      @default(now())

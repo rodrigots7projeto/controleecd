@@ -7,6 +7,7 @@ export type SessionPayload = {
   nome: string
   perfil: 'ADMINISTRADOR' | 'USUARIO'
   primeiro_acesso: boolean
+  permissoes: string[]
   expiresAt: Date
 }
 
