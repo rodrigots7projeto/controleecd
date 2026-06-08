@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { verifySession } from '@/lib/dal'
+import { temPermissao } from '@/lib/permissoes'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 
@@ -21,7 +23,8 @@ function alertaCor(dias: number) {
 }
 
 export default async function ObrigacoesPage() {
-  await verifySession()
+  const session = await verifySession()
+  if (!temPermissao(session, 'obrigacoes')) redirect('/dashboard')
 
   const [totalEmpresas, ecdPendentes, ecfPendentes, ecdEntregues, ecfEntregues] = await Promise.all([
     prisma.empresa.count({ where: { situacao_empresa: { in: ['ATIVA', 'SUSPENSA'] } } }),

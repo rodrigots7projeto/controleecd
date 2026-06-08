@@ -1,12 +1,15 @@
 import { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { verifySession } from '@/lib/dal'
+import { temPermissao } from '@/lib/permissoes'
 import { prisma } from '@/lib/prisma'
 import EmpresasLista from './empresas-lista'
 
 export const metadata: Metadata = { title: 'Empresas | Controle ECD/ECF' }
 
 export default async function EmpresasPage() {
-  await verifySession()
+  const session = await verifySession()
+  if (!temPermissao(session, 'empresas')) redirect('/dashboard')
 
   const empresas = await prisma.empresa.findMany({
     orderBy: [{ prioridade: 'desc' }, { empresa: 'asc' }],
